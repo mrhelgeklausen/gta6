@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grand Theft Pixel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    { "imports": { "three": "./lib/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <div id="flash"></div>
+
+  <div id="hud" class="hidden">
+    <div id="topright">
+      <div id="weapon">PISTOL</div>
+      <div id="money">$00000000</div>
+      <div id="healthwrap"><div id="healthbar"></div></div>
+      <div id="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+    </div>
+    <canvas id="minimap" width="180" height="180"></canvas>
+    <div id="carbox"><div id="speed">0 KM/T</div><div id="carhpwrap"><div id="carhp"></div></div></div>
+    <div id="crosshair"></div>
+    <div id="hint"></div>
+    <div id="toast"></div>
+    <div id="carname"></div>
+    <div id="wasted">WASTED</div>
+  </div>
+
+  <div id="overlay">
+    <h1>GRAND THEFT<br /><span>PIXEL</span></h1>
+    <div id="start-text">KLIKK FOR Å SPILLE</div>
+    <table id="controls">
+      <tr><td>WASD</td><td>Gå / kjør</td></tr>
+      <tr><td>MUS</td><td>Se rundt</td></tr>
+      <tr><td>V. KLIKK</td><td>Skyt / slå</td></tr>
+      <tr><td>H. KLIKK</td><td>Sikt</td></tr>
+      <tr><td>F / E</td><td>Inn / ut av bil</td></tr>
+      <tr><td>SHIFT</td><td>Løp</td></tr>
+      <tr><td>SPACE</td><td>Hopp / håndbrekk</td></tr>
+      <tr><td>1-4 / Q / HJUL</td><td>Bytt våpen</td></tr>
+      <tr><td>H</td><td>Tut</td></tr>
+      <tr><td>P / M</td><td>Pikselstørrelse / lyd</td></tr>
+    </table>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

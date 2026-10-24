@@ -1,0 +1,104 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #120c20;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  color: #fff;
+  user-select: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: filter 1s;
+}
+#game.gray { filter: grayscale(1) contrast(1.2) brightness(0.8); }
+
+.hidden { display: none !important; }
+
+#flash {
+  position: fixed; inset: 0; pointer-events: none;
+  background: #c00010; opacity: 0; transition: opacity 0.12s; z-index: 5;
+}
+
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+
+#topright {
+  position: absolute; top: 18px; right: 22px; text-align: right;
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
+}
+#weapon { font-size: 12px; color: #9fe8ff; margin-bottom: 10px; }
+#money { font-size: 22px; color: #6bff8a; letter-spacing: 1px; }
+#healthwrap {
+  width: 220px; height: 14px; margin: 10px 0 10px auto;
+  border: 3px solid #000; background: #3a0a10;
+}
+#healthbar { height: 100%; width: 100%; background: #ff3a4a; box-shadow: inset 0 -3px 0 #b01828; }
+#stars { font-size: 26px; letter-spacing: 4px; }
+.star { color: rgba(255, 255, 255, 0.18); }
+.star.on { color: #ffd23a; }
+.star.blink { color: #fff; }
+
+#minimap {
+  position: absolute; left: 22px; bottom: 22px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  border: 4px solid #111;
+  box-shadow: 0 0 0 3px #f2788a;
+  image-rendering: pixelated;
+}
+
+#carbox { position: absolute; right: 22px; bottom: 26px; text-align: right; display: none; }
+#speed { font-size: 18px; text-shadow: 3px 3px 0 #000; color: #ffd23a; }
+#carhpwrap { width: 140px; height: 10px; margin: 8px 0 0 auto; border: 3px solid #000; background: #222; }
+#carhp { height: 100%; width: 100%; background: #f0a030; }
+
+#crosshair {
+  position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  background:
+    linear-gradient(#fff, #fff) center / 2px 14px no-repeat,
+    linear-gradient(#fff, #fff) center / 14px 2px no-repeat;
+  mix-blend-mode: difference;
+}
+
+#hint {
+  position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; text-shadow: 2px 2px 0 #000; color: #fff; white-space: nowrap;
+}
+#toast {
+  position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+  font-size: 16px; color: #6bff8a; text-shadow: 3px 3px 0 #000; opacity: 0; transition: opacity 0.3s;
+}
+#carname {
+  position: absolute; bottom: 120px; right: 22px; font-size: 22px; color: #f2788a;
+  text-shadow: 3px 3px 0 #000; opacity: 0; transition: opacity 0.6s; font-style: italic;
+}
+#wasted {
+  position: absolute; top: 42%; left: 0; right: 0; text-align: center;
+  font-size: 64px; color: #d01020; text-shadow: 5px 5px 0 #000;
+  opacity: 0; transform: scale(2); transition: opacity 0.8s, transform 0.8s;
+}
+#wasted.show { opacity: 1; transform: scale(1); }
+
+#overlay {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(29, 24, 64, 0.82), rgba(176, 74, 140, 0.55));
+  cursor: pointer; text-align: center;
+}
+#overlay h1 {
+  margin: 0 0 30px; font-size: 44px; line-height: 1.3; color: #fff;
+  text-shadow: 4px 4px 0 #f2788a, 8px 8px 0 #1d1840;
+}
+#overlay h1 span { font-size: 70px; color: #ffd23a; }
+#start-text { font-size: 16px; color: #9fe8ff; animation: pulse 1s steps(2) infinite; margin-bottom: 30px; }
+@keyframes pulse { 50% { opacity: 0.2; } }
+#controls { font-size: 10px; line-height: 2; border-spacing: 16px 0; color: #ffe0f0; }
+#controls td:first-child { text-align: right; color: #ffd23a; }
+#controls td:last-child { text-align: left; }
