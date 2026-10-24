@@ -1,5 +1,5 @@
 // Cars: blocky models, arcade physics and traffic / police AI.
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 import { DIRS, LANE, N, P, roadC, groundHeight, nearestNode } from './world.js';
 import { PC } from './particles.js';
 

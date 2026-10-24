@@ -1,5 +1,5 @@
 // Blocky pixel people: civilians, cops and the player.
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 import { faceTexture } from './textures.js';
 import { blockRect, groundHeight, nearestBlock, N } from './world.js';
 import { PC } from './particles.js';

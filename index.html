@@ -2,14 +2,16 @@
 <html lang="no">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GT Pixel" />
+  <meta name="theme-color" content="#1d1840" />
   <title>Grand Theft Pixel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script type="importmap">
-    { "imports": { "three": "./lib/three.module.min.js" } }
-  </script>
 </head>
 <body>
   <div id="flash"></div>
@@ -30,6 +32,19 @@
     <div id="wasted">WASTED</div>
   </div>
 
+  <div id="touch" class="hidden">
+    <div id="touchzone"></div>
+    <div id="stick"><div id="knob"></div></div>
+    <div id="b-pause" class="tbtn small">II</div>
+    <div id="b-weapon" class="tbtn">PIST</div>
+    <div id="b-car" class="tbtn">BIL</div>
+    <div id="b-horn" class="tbtn">TUT</div>
+    <div id="b-jump" class="tbtn"><span class="foot">HOPP</span><span class="drive">BREMS</span></div>
+    <div id="b-fire" class="tbtn big">SKYT</div>
+  </div>
+
+  <div id="rotate"><div>↻</div>SNU TELEFONEN<br />TIL LIGGENDE</div>
+
   <div id="overlay">
     <h1>GRAND THEFT<br /><span>PIXEL</span></h1>
     <div id="start-text">KLIKK FOR Å SPILLE</div>
@@ -45,6 +60,15 @@
       <tr><td>H</td><td>Tut</td></tr>
       <tr><td>P / M</td><td>Pikselstørrelse / lyd</td></tr>
     </table>
+    <table id="touchhelp">
+      <tr><td>VENSTRE SIDE</td><td>Joystick: gå / kjør</td></tr>
+      <tr><td>HØYRE SIDE</td><td>Sveip for å se rundt</td></tr>
+      <tr><td>SKYT</td><td>Hold inne (siktehjelp)</td></tr>
+      <tr><td>BIL</td><td>Inn / ut av bil</td></tr>
+      <tr><td>HOPP / BREMS</td><td>Hopp, håndbrekk i bil</td></tr>
+      <tr><td>VÅPEN-KNAPP</td><td>Bytt våpen</td></tr>
+    </table>
+    <div id="a2hs">Tips: Del → «Legg til på Hjem-skjerm» for fullskjerm</div>
   </div>
 
   <script type="module" src="src/main.js"></script>

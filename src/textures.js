@@ -1,5 +1,5 @@
 // Procedurally generated pixel-art textures (all drawn on tiny canvases).
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 
 export function rng(seed) {
   // mulberry32

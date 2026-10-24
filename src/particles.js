@@ -1,5 +1,5 @@
 // Square "pixel" particles: blood, sparks, smoke, fire, explosions.
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 
 const MAX = 4000;
 

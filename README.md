@@ -15,6 +15,27 @@ python3 -m http.server 8000
 
 Det fungerer også rett fra GitHub Pages.
 
+## Spille på iPhone
+
+Spillet har egne berøringskontroller som slår seg på automatisk på mobil:
+
+1. Legg spillet på en HTTPS-adresse, f.eks. GitHub Pages (*Settings → Pages → Deploy from branch*).
+2. Åpne adressen i Safari og hold telefonen **liggende**.
+3. For fullskjerm: trykk *Del → «Legg til på Hjem-skjerm»* og start spillet fra ikonet.
+4. Lyd: sørg for at lydløsbryteren på siden av telefonen er av.
+
+| Kontroll | Handling |
+| --- | --- |
+| Venstre halvdel | Joystick: gå (dra helt ut for å løpe) / kjør (opp = gass, ned = brems/revers) |
+| Høyre halvdel | Sveip for å se rundt |
+| SKYT | Hold inne for å skyte – siktehjelp låser mot nærmeste mål |
+| BIL | Inn i / ut av bil |
+| HOPP / BREMS | Hopp til fots, håndbrekk i bil |
+| Våpenknappen | Bytt våpen |
+| TUT / II | Tut (i bil) / pause |
+
+På mobil bruker spillet litt lavere detaljnivå (færre folk og biler, mindre skyggekart) for jevn bildefrekvens.
+
 ## Kontroller
 
 | Tast | Handling |
@@ -52,3 +73,4 @@ Det fungerer også rett fra GitHub Pages.
 | `src/particles.js` | Firkantede pikselpartikler (blod, gnister, røyk, ild) |
 | `src/audio.js` | Syntetiserte lydeffekter med WebAudio |
 | `src/geo.js` | Slår sammen bokser til få draw calls |
+| `src/touch.js` | Berøringskontroller for mobil |

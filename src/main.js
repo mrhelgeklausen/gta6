@@ -1,11 +1,12 @@
 // GRAND THEFT PIXEL — main game loop, player, weapons, police and HUD.
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 import { makeTextures } from './textures.js';
 import { buildCity, blockRect, groundHeight, roadC, rayBox, DIRS, N, HALF, CITY, CURB } from './world.js';
 import { Particles, PC } from './particles.js';
 import { Sfx } from './audio.js';
 import { Ped } from './human.js';
 import { Car, lanePlacement } from './car.js';
+import { TouchControls, IS_TOUCH } from './touch.js';
 
 const WEAPONS = [
   { name: 'Knyttneve', melee: true, rate: 0.4, dmg: 22 },
@@ -14,8 +15,8 @@ const WEAPONS = [
   { name: 'Hagle', rate: 0.85, dmg: 13, spread: 0.075, pellets: 9, auto: false, kind: 3 },
 ];
 const STAR_HEAT = [0, 20, 70, 150, 260, 400];
-const CIV_COUNT = 90;
-const TRAFFIC_COUNT = 42;
+const CIV_COUNT = IS_TOUCH ? 60 : 90;
+const TRAFFIC_COUNT = IS_TOUCH ? 30 : 42;
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -23,7 +24,12 @@ const $ = (id) => document.getElementById(id);
 
 class Game {
   constructor() {
-    this.pixelScale = 3;
+    this.pixelScale = IS_TOUCH ? 2 : 3;
+    if (IS_TOUCH) {
+      document.body.classList.add('touchdev');
+      $('start-text').textContent = 'TRYKK FOR Å SPILLE';
+      $('rotate').addEventListener('click', () => document.body.classList.add('portrait-ok'));
+    }
     this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.BasicShadowMap;
@@ -32,7 +38,7 @@ class Game {
     document.body.prepend(this.canvas);
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog('#f7a88a', 60, 240);
+    this.scene.fog = new THREE.Fog('#f7a88a', 60, IS_TOUCH ? 200 : 240);
     this.camera = new THREE.PerspectiveCamera(65, 1, 0.1, 1500);
 
     this.T = makeTextures();
@@ -74,6 +80,9 @@ class Game {
     this.setupInput();
     this.resize();
     window.addEventListener('resize', () => this.resize());
+    window.visualViewport?.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 300));
+    document.addEventListener('visibilitychange', () => { if (document.hidden && this.started) this.pause(); });
 
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop(() => this.frame());
@@ -98,7 +107,7 @@ class Game {
     this.scene.add(new THREE.HemisphereLight('#ffd6f0', '#6a4a70', 1.5));
     const dl = new THREE.DirectionalLight('#ffcf9a', 2.4);
     dl.castShadow = true;
-    dl.shadow.mapSize.set(2048, 2048);
+    dl.shadow.mapSize.setScalar(IS_TOUCH ? 1024 : 2048);
     const sc = dl.shadow.camera;
     sc.left = sc.bottom = -70;
     sc.right = sc.top = 70;
@@ -235,6 +244,7 @@ class Game {
     const start = () => {
       this.sfx.init();
       this.sfx.resume();
+      if (IS_TOUCH) this.noLock = true;
       if (this.noLock) { this.begin(); return; }
       const p = this.canvas.requestPointerLock?.();
       if (p && p.catch) p.catch(() => { this.noLock = true; this.begin(); });
@@ -294,6 +304,7 @@ class Game {
     $('overlay').classList.add('hidden');
     $('hud').classList.remove('hidden');
     this.sfx.resume();
+    if (IS_TOUCH && !this.touch) this.touch = new TouchControls(this);
   }
 
   pause() {
@@ -301,7 +312,8 @@ class Game {
     this.keys.clear();
     this.mouse.left = this.mouse.right = false;
     $('overlay').classList.remove('hidden');
-    $('start-text').textContent = 'PAUSE — klikk for å fortsette';
+    $('start-text').textContent = IS_TOUCH ? 'PAUSE — trykk for å fortsette' : 'PAUSE — klikk for å fortsette';
+    this.touch?.reset();
     this.sfx.engine(false, 0);
     this.sfx.siren(0);
   }
@@ -469,6 +481,7 @@ class Game {
     const origin = cam.position.clone();
     const fwd = new THREE.Vector3();
     cam.getWorldDirection(fwd);
+    if (this.touch) this.aimAssist(origin, fwd);
     const tMin = pl.inCar ? 0 : origin.distanceTo(pl.ped.pos) - 0.6;
     const muzzle = this.muzzlePos();
     for (let k = 0; k < w.pellets; k++) {
@@ -504,6 +517,28 @@ class Game {
       const d = p.pos.distanceTo(pp);
       if (d < 40) p.scare(pp);
       if (p.role === 'cop' && d < 30 && this.wanted === 0) { this.crime(20, pp); }
+    }
+  }
+
+  // Phones: snap the shot towards the best target near the centre of the screen.
+  aimAssist(origin, fwd) {
+    const pl = this.player;
+    const from = this.playerPos;
+    let best = null, bestScore = Infinity;
+    for (const p of this.peds) {
+      if (!p.alive) continue;
+      const d = p.pos.distanceTo(from);
+      if (d > 45 || d < 0.5) continue;
+      const chest = new THREE.Vector3(p.pos.x, p.pos.y + 1.2, p.pos.z);
+      const v = chest.clone().sub(origin).normalize();
+      const ang = Math.acos(clamp(v.dot(fwd), -1, 1));
+      if (ang > 0.32) continue;
+      const score = ang * 30 + d * 0.3 - (p.state === 'chase' ? 6 : 0);
+      if (score < bestScore && this.lineOfSight(from, p.pos, 1.2)) { bestScore = score; best = chest; }
+    }
+    if (best) {
+      fwd.copy(best.sub(origin).normalize());
+      if (!pl.inCar) pl.ped.facing = Math.atan2(fwd.x, fwd.z);
     }
   }
 
@@ -689,6 +724,12 @@ class Game {
     inp.throttle = (up ? 1 : 0) - (down ? 1 : 0);
     inp.steer = (this.key('KeyD', 'ArrowRight') ? 1 : 0) - (this.key('KeyA', 'ArrowLeft') ? 1 : 0);
     inp.brake = this.key('Space');
+    const t = this.touch;
+    if (t) {
+      if (Math.abs(t.moveY) > 0.25) inp.throttle = clamp(inp.throttle + Math.sign(t.moveY) * Math.min(1, (Math.abs(t.moveY) - 0.15) * 1.6), -1, 1);
+      if (Math.abs(t.moveX) > 0.12) inp.steer = clamp(inp.steer + t.moveX * 1.3, -1, 1);
+      inp.brake = inp.brake || t.jump;
+    }
   }
 
   collideCars(dt) {
@@ -787,7 +828,7 @@ class Game {
     this.shootCD -= dt;
     this.aimT -= dt;
     const w = WEAPONS[pl.weapon];
-    const wantFire = w.auto ? this.mouse.left : this.trigger;
+    const wantFire = (w.auto ? this.mouse.left : this.trigger) || this.touch?.fire;
     this.trigger = false;
     if (wantFire && this.shootCD <= 0 && !(pl.inCar && w.melee)) {
       this.shootCD = w.rate;
@@ -799,7 +840,7 @@ class Game {
       const c = pl.inCar;
       ped.pos.copy(c.pos);
       this.sfx.engine(true, clamp(Math.abs(c.speed) / c.spec.maxSpeed, 0, 1) + (c.input.throttle !== 0 ? 0.15 : 0));
-      if (c.fireT > 0) $('hint').textContent = 'BILEN BRENNER! Hopp ut med F!';
+      $('hint').textContent = c.fireT > 0 ? `BILEN BRENNER! Hopp ut med ${this.touch ? 'BIL' : 'F'}!` : '';
       return;
     }
 
@@ -811,12 +852,19 @@ class Game {
     if (this.key('KeyS', 'ArrowDown')) { mx -= fx; mz -= fz; }
     if (this.key('KeyD', 'ArrowRight')) { mx += rx; mz += rz; }
     if (this.key('KeyA', 'ArrowLeft')) { mx -= rx; mz -= rz; }
+    let tmag = 0;
+    if (this.touch) {
+      const t = this.touch;
+      tmag = Math.hypot(t.moveX, t.moveY);
+      if (tmag > 0.15) { mx += fx * t.moveY + rx * t.moveX; mz += fz * t.moveY + rz * t.moveX; }
+    }
     const ml = Math.hypot(mx, mz);
     const aiming = this.mouse.right || this.aimT > 0;
     let speed = 0;
     if (ml > 0) {
       mx /= ml; mz /= ml;
-      speed = this.key('ShiftLeft', 'ShiftRight') && !this.mouse.right ? 7.5 : aiming ? 3.2 : 4.5;
+      const sprint = this.key('ShiftLeft', 'ShiftRight') || tmag > 0.92;
+      speed = sprint && !this.mouse.right ? 7.5 : aiming ? 3.2 : tmag > 0.15 && tmag < 0.5 ? 2.5 : 4.5;
       ped.move(mx * speed * dt, mz * speed * dt);
       if (!aiming) ped.faceTowards(Math.atan2(mx, mz), dt, 12);
     }
@@ -825,7 +873,7 @@ class Game {
     ped.moveSpeed = speed;
     // jumping
     const gh = groundHeight(ped.pos.x, ped.pos.z);
-    if (this.key('Space') && ped.pos.y <= gh + 0.01) pl.vy = 6.5;
+    if ((this.key('Space') || this.touch?.jump) && ped.pos.y <= gh + 0.01) pl.vy = 6.5;
     pl.vy -= 20 * dt;
     ped.pos.y += pl.vy * dt;
     if (ped.pos.y <= gh) { ped.pos.y = gh; pl.vy = 0; }
@@ -842,7 +890,8 @@ class Game {
     // context hint
     let near = null;
     for (const c of this.cars) if (!c.dead && c.pos.distanceTo(ped.pos) < 4.2) { near = c; break; }
-    $('hint').textContent = near ? `Trykk F for å ${near.driver ? 'stjele' : 'ta'} bilen (${near.spec.name})` : '';
+    const btn = this.touch ? 'BIL' : 'F';
+    $('hint').textContent = near ? `Trykk ${btn} for å ${near.driver ? 'stjele' : 'ta'} bilen (${near.spec.name})` : '';
   }
 
   collect(p) {
@@ -1023,7 +1072,7 @@ class Game {
     this.sun.position.copy(pos).addScaledVector(this.sunDir, 700);
     this.sun.lookAt(pos);
     const t = this.playerPos;
-    const snap = 140 / 2048;
+    const snap = 140 / this.sunLight.shadow.mapSize.x;
     const lx = Math.round(t.x / snap) * snap, lz = Math.round(t.z / snap) * snap;
     this.sunLight.target.position.set(lx, 0, lz);
     this.sunLight.position.set(lx, 0, lz).addScaledVector(this.sunDir, 200);
@@ -1180,7 +1229,7 @@ class Game {
     for (const c of this.cars) c.root.visible = c.pos.distanceTo(cp) < 230;
     this.particles.update(dt, this.renderer, this.camera);
     this.renderer.render(this.scene, this.camera);
-    if (this.started) this.updateHUD();
+    if (this.started) { this.updateHUD(); this.touch?.update(); }
   }
 }
 

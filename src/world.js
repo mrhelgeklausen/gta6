@@ -1,5 +1,5 @@
 // City layout, static geometry and static collision.
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 import { GeoBuilder } from './geo.js';
 import { rng } from './textures.js';
 

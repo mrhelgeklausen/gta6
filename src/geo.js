@@ -1,6 +1,6 @@
 // Tiny geometry builder that merges many boxes/quads into one BufferGeometry
 // so the whole static city renders in a handful of draw calls.
-import * as THREE from 'three';
+import * as THREE from '../lib/three.module.min.js';
 
 const _c = new THREE.Color();
 
